@@ -10,16 +10,16 @@ function SearchResults() {
   useEffect(() => {
     // Example product data (should be fetched from an API or state)
     const allProducts = [
-      { id: 1, name: 'Organic Apples', rate: 3, quantity: '1 kg', image: 'apple.jpeg' },
-      { id: 2, name: 'Fresh Carrots', rate: 2, quantity: '500 g', image: 'carrot.jpeg' },
-      { id: 3, name: 'Natural Almonds', rate: 10, quantity: '250 g', image: 'almonds.jpeg' },
-      { id: 4, name: 'Farm-Fresh Milk', rate: 5, quantity: '1 L', image: 'milk.jpeg' },
-      { id: 5, name: 'Organic Spinach', rate: 2, quantity: '250 g', image: 'spinach.jpeg' },
-      { id: 6, name: 'Free-Range Eggs', rate: 4, quantity: '12 pcs', image: 'eggs.jpeg' },
-      { id: 7, name: 'Pure Honey', rate: 8, quantity: '500 ml', image: 'honey.jpeg' },
-      { id: 8, name: 'Organic Tomatoes', rate: 3, quantity: '1 kg', image: 'tomatos.jpeg' },
-      { id: 9, name: 'Raw Walnuts', rate: 9, quantity: '250 g', image: 'walnut.jpeg' },
-      { id: 10, name: 'Whole Wheat Bread', rate: 4, quantity: '1 loaf', image: 'wheat bread.jpeg' },
+      { id: 1, name: 'Organic Apples', rate: 3, quantity: '1 kg', image: 'assets/apple.jpeg' },
+      { id: 2, name: 'Fresh Carrots', rate: 2, quantity: '500 g', image: 'assets/carrot.jpeg' },
+      { id: 3, name: 'Natural Almonds', rate: 10, quantity: '250 g', image: 'assets/almonds.jpeg' },
+      { id: 4, name: 'Farm-Fresh Milk', rate: 5, quantity: '1 L', image: 'assets/milk.jpeg' },
+      { id: 5, name: 'Organic Spinach', rate: 2, quantity: '250 g', image: 'assets/spinach.jpeg' },
+      { id: 6, name: 'Free-Range Eggs', rate: 4, quantity: '12 pcs', image: 'assets/eggs.jpeg' },
+      { id: 7, name: 'Pure Honey', rate: 8, quantity: '500 ml', image: 'assets/honey.jpeg' },
+      { id: 8, name: 'Organic Tomatoes', rate: 3, quantity: '1 kg', image: 'assets/tomatos.jpeg' },
+      { id: 9, name: 'Raw Walnuts', rate: 9, quantity: '250 g', image: 'assets/walnut.jpeg' },
+      { id: 10, name: 'Whole Wheat Bread', rate: 4, quantity: '1 loaf', image: 'assets/wheat bread.jpeg' },
       // Add more products here
     ];
 

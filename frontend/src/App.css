@@ -486,6 +486,7 @@ body {
 .quantity-controls {
   display: flex;
   align-items: center;
+  justify-content: center;
 }
 
 .quantity-controls button {
