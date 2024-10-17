@@ -8,41 +8,10 @@ function Home() {
     const [selectedFarm, setSelectedFarm] = useState(null);
     const [quantities, setQuantities] = useState({});
     const [hoveredProductId, setHoveredProductId] = useState(null);
+    const [farmsData, setFarmsData] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const navigate = useNavigate();
-
-    // Product data with secondary images and farm inside images
-    const farms = {
-        Varadha: {
-            products: [
-                { id: 1, name: 'Organic Apples', rate: 3, quantity: '1 kg', image: 'assets/apple.jpeg', hoverImage: 'assets/apple-hover.jpg' },
-                { id: 2, name: 'Fresh Carrots', rate: 2, quantity: '500 g', image: 'assets/carrot.jpeg', hoverImage: 'assets/carrot-hover.jpg' },
-                { id: 3, name: 'Natural Almonds', rate: 10, quantity: '250 g', image: 'assets/almonds.jpeg', hoverImage: 'assets/almonds-hover.jpg' },
-                { id: 4, name: 'Farm-Fresh Milk', rate: 5, quantity: '1 L', image: 'assets/milk.jpeg', hoverImage: 'assets/milk-hover.jpg' },
-                { id: 5, name: 'Organic Spinach', rate: 2, quantity: '250 g', image: 'assets/spinach.jpeg', hoverImage: 'assets/spinach-hover.jpg' },
-            ],
-            farminside: 'assets/varadhiinside.webp'
-        },
-        Vamshi: {
-            products: [
-                { id: 6, name: 'Free-Range Eggs', rate: 4, quantity: '12 pcs', image: 'assets/eggs.jpeg', hoverImage: 'assets/eggs-hover.jpg' },
-                { id: 7, name: 'Pure Honey', rate: 8, quantity: '500 ml', image: 'assets/honey.jpeg', hoverImage: 'assets/honey-hover.jpg' },
-                { id: 8, name: 'Organic Tomatoes', rate: 3, quantity: '1 kg', image: 'assets/tomatos.jpeg', hoverImage: 'assets/tomato-hover.png' },
-                { id: 9, name: 'Raw Walnuts', rate: 9, quantity: '250 g', image: 'assets/walnut.jpeg', hoverImage: 'assets/raw-walnut.png' },
-                { id: 10, name: 'Whole Wheat Bread', rate: 4, quantity: '1 loaf', image: 'assets/wheat bread.jpeg', hoverImage: 'assets/wheatbrownbread.png' },
-            ],
-            farminside: 'assets/vamshiinside.jpeg'
-        },
-        Keshav: {
-            products: [
-                { id: 11, name: 'eggs', rate: 15, quantity: '12 pcs', image: 'assets/eggs.jpeg', hoverImage: 'assets/eggs-hover.jpg' },
-                { id: 12, name: 'Fresh Carrots', rate: 2, quantity: '500 g', image: 'assets/carrot.jpeg', hoverImage: 'assets/carrot-hover.jpg' },
-                { id: 13, name: 'Natural Almonds', rate: 10, quantity: '250 g', image: 'assets/almonds.jpeg', hoverImage: 'assets/almonds-hover.jpg' },
-                { id: 14, name: 'Farm-Fresh Milk', rate: 5, quantity: '1 L', image: 'assets/milk.jpeg', hoverImage: 'assets/milk-hover.jpg' },
-                { id: 15, name: 'Organic Spinach', rate: 2, quantity: '250 g', image: 'assets/spinach.jpeg', hoverImage: 'assets/spinach-hover.jpg' },
-            ],
-            farminside: 'assets/keshavinside.jpg'
-        }
-    };
 
     const addToCart = (product) => {
         const quantity = quantities[product.id] || 1;
@@ -61,8 +30,21 @@ function Home() {
     };
 
     useEffect(() => {
-        const storedCart = JSON.parse(localStorage.getItem('cart')) || [];
-        setCart(storedCart);
+        const fetchFarms = async () => {
+            setLoading(true);
+            try {
+                const response = await fetch('http://localhost:5000/farms');
+                const data = await response.json();
+                setFarmsData(data);
+            } catch (error) {
+                console.error('Error fetching farms:', error);
+                setError('Failed to load farms. Please try again later.');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchFarms();
     }, []);
 
     const handleQuantityChange = (productId, delta) => {
@@ -92,26 +74,23 @@ function Home() {
         );
     };
 
-    const farmsData = [
-        { name: 'Varadha', logo: 'assets/varadhi.jpeg', description: 'Providing the freshest organic produce directly from our farm to your table.' },
-        { name: 'Vamshi', logo: 'assets/vamshi.jpeg', description: 'Experience the goodness of nature with our range of organic products.' },
-        { name: 'Keshav', logo: 'assets/keshav.jpeg', description: 'Fresh, local, and organic - we bring the farm to your doorstep.' }
-    ];
+    if (loading) return <div>Loading farms...</div>;
+    if (error) return <div>{error}</div>;
 
     return (
         <div>
             <div className="mainhead">
-            <h1>Welcome to ECOGROCER</h1>
-            <p>Fresh, Organic Food Delivered Directly From Farms to Your Doorstep</p>
+                <h1>Welcome to ECOGROCER</h1>
+                <p>Fresh, Organic Food Delivered Directly From Farms to Your Doorstep</p>
             </div>
 
             {!selectedFarm ? (
                 <div className="farm-container">
                     {farmsData.map((farm) => (
                         <FarmBox
-                            key={farm.name}
+                            key={farm._id} // Assuming _id is the unique identifier from your DB
                             farm={farm}
-                            onClick={(name) => setSelectedFarm(name)}
+                            onClick={(name) => setSelectedFarm(farm.name)} // Ensure the farm name is set correctly
                         />
                     ))}
                 </div>
@@ -119,8 +98,12 @@ function Home() {
                 <div className="farm">
                     <button onClick={() => setSelectedFarm(null)}>Back to Farms</button>
                     <h2>{selectedFarm} Farms</h2>
-                    <img src={farms[selectedFarm].farminside} alt={`${selectedFarm} Farms Logo`} className="farm-logo" />
-                    {renderFarmProducts(farms[selectedFarm].products)}
+                    <img 
+                        src={farmsData.find(farm => farm.name === selectedFarm).farminside} 
+                        alt={`${selectedFarm} Farms Logo`} 
+                        className="farm-logo" 
+                    />
+                    {renderFarmProducts(farmsData.find(farm => farm.name === selectedFarm).products)}
                 </div>
             )}
         </div>
@@ -128,4 +111,3 @@ function Home() {
 }
 
 export default Home;
- 

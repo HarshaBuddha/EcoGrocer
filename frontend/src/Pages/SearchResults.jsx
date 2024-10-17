@@ -4,32 +4,47 @@ import { useLocation } from 'react-router-dom';
 function SearchResults() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const location = useLocation();
   const query = new URLSearchParams(location.search).get('query');
 
   useEffect(() => {
-    // Example product data (should be fetched from an API or state)
-    const allProducts = [
-      { id: 1, name: 'Organic Apples', rate: 3, quantity: '1 kg', image: 'assets/apple.jpeg' },
-      { id: 2, name: 'Fresh Carrots', rate: 2, quantity: '500 g', image: 'assets/carrot.jpeg' },
-      { id: 3, name: 'Natural Almonds', rate: 10, quantity: '250 g', image: 'assets/almonds.jpeg' },
-      { id: 4, name: 'Farm-Fresh Milk', rate: 5, quantity: '1 L', image: 'assets/milk.jpeg' },
-      { id: 5, name: 'Organic Spinach', rate: 2, quantity: '250 g', image: 'assets/spinach.jpeg' },
-      { id: 6, name: 'Free-Range Eggs', rate: 4, quantity: '12 pcs', image: 'assets/eggs.jpeg' },
-      { id: 7, name: 'Pure Honey', rate: 8, quantity: '500 ml', image: 'assets/honey.jpeg' },
-      { id: 8, name: 'Organic Tomatoes', rate: 3, quantity: '1 kg', image: 'assets/tomatos.jpeg' },
-      { id: 9, name: 'Raw Walnuts', rate: 9, quantity: '250 g', image: 'assets/walnut.jpeg' },
-      { id: 10, name: 'Whole Wheat Bread', rate: 4, quantity: '1 loaf', image: 'assets/wheat bread.jpeg' },
-      // Add more products here
-    ];
+    const fetchSearchResults = async () => {
+      if (!query) {
+        setLoading(false);
+        return;
+      }
+      setLoading(true);
+      try {
+        // Fetch all farms to get their products
+        const response = await fetch('http://localhost:5000/farms');
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const farms = await response.json();
 
-    // Filter products based on search query
-    const filteredResults = allProducts.filter(product =>
-      product.name.toLowerCase().includes(query.toLowerCase())
-    );
+        // Extract products from all farms and filter them based on the search query
+        const allProducts = farms.flatMap(farm => 
+          farm.products.map(product => ({
+            ...product,
+            farmName: farm.name // Add farm name to each product
+          }))
+        );
+        
+        const filteredResults = allProducts.filter(product =>
+          product.name.toLowerCase().includes(query.toLowerCase())
+        );
 
-    setResults(filteredResults);
-    setLoading(false);
+        setResults(filteredResults);
+      } catch (error) {
+        console.error('Error fetching search results:', error);
+        setError('Failed to load search results. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSearchResults();
   }, [query]);
 
   return (
@@ -37,11 +52,14 @@ function SearchResults() {
       <h1>Search Results</h1>
       {loading ? (
         <p>Loading...</p>
+      ) : error ? (
+        <p>{error}</p>
       ) : results.length > 0 ? (
-        results.map(product => (
-          <div key={product.id}>
+        results.map((product, index) => (
+          <div key={index} className="product-card">
             <img src={product.image} alt={product.name} />
             <h3>{product.name}</h3>
+            <p>Farm: {product.farmName}</p> {/* Display the farm name */}
             <p>Rate: ${product.rate}</p>
             <p>Quantity: {product.quantity}</p>
           </div>
