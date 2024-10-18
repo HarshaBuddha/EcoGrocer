@@ -14,7 +14,7 @@ function Home() {
     const navigate = useNavigate();
 
     const addToCart = (product) => {
-        const quantity = quantities[product.id] || 1;
+        const quantity = quantities[product._id] || 1;
         const productWithQuantity = { ...product, selectedQuantity: quantity };
         const updatedCart = [...cart, productWithQuantity];
         setCart(updatedCart);
@@ -23,7 +23,7 @@ function Home() {
     };
 
     const handleBuyNow = (product) => {
-        const quantity = quantities[product.id] || 1;
+        const quantity = quantities[product._id] || 1;
         const productWithQuantity = { ...product, selectedQuantity: quantity };
         localStorage.setItem('cart', JSON.stringify([productWithQuantity]));
         navigate('/payment');
@@ -59,15 +59,15 @@ function Home() {
             <div className="products">
                 {products.map((product) => (
                     <ProductCard
-                        key={product.id}
+                        key={product._id}
                         product={product}
-                        quantity={quantities[product.id] || 1}
+                        quantity={quantities[product._id] || 1}
                         onAddToCart={addToCart}
                         onBuyNow={handleBuyNow}
-                        onQuantityChange={(delta) => handleQuantityChange(product.id, delta)}
-                        onMouseEnter={() => setHoveredProductId(product.id)}
+                        onQuantityChange={(delta) => handleQuantityChange(product._id, delta)}
+                        onMouseEnter={() => setHoveredProductId(product._id)}
                         onMouseLeave={() => setHoveredProductId(null)}
-                        isHovered={hoveredProductId === product.id}
+                        isHovered={hoveredProductId === product._id}
                     />
                 ))}
             </div>
