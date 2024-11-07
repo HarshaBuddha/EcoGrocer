@@ -7,16 +7,14 @@ function AddressPage() {
     street: '',
     city: '',
     postalCode: '',
-    phoneNumber: '', // Add phoneNumber to the state
+    phoneNumber: '',
   });
   
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Retrieve cart and totalAmount from the location state
   const { cart, totalAmount } = location.state || { cart: [], totalAmount: 0 };
 
-  // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setAddress((prevAddress) => ({
@@ -25,14 +23,20 @@ function AddressPage() {
     }));
   };
 
-  // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // Store address in localStorage or send to server as needed
-    localStorage.setItem('address', JSON.stringify(address));
+    if (!/^\d{6}$/.test(address.postalCode)) {
+      alert('Postal Code must be exactly 6 digits.');
+      return;
+    }
+    
+    if (!/^\d{10}$/.test(address.phoneNumber)) {
+      alert('Phone Number must be exactly 10 digits.');
+      return;
+    }
 
-    // Navigate to the payment page with totalAmount, cart, and address
+    localStorage.setItem('address', JSON.stringify(address));
     navigate('/payment', { state: { totalAmount, cart, address } });
   };
 
@@ -46,6 +50,7 @@ function AddressPage() {
             type="text"
             id="name"
             name="name"
+            placeholder="Enter your full name"
             value={address.name}
             onChange={handleChange}
             required
@@ -57,6 +62,7 @@ function AddressPage() {
             type="text"
             id="street"
             name="street"
+            placeholder="Enter your street address"
             value={address.street}
             onChange={handleChange}
             required
@@ -68,6 +74,7 @@ function AddressPage() {
             type="text"
             id="city"
             name="city"
+            placeholder="Enter your city"
             value={address.city}
             onChange={handleChange}
             required
@@ -79,6 +86,7 @@ function AddressPage() {
             type="text"
             id="postalCode"
             name="postalCode"
+            placeholder="6-digit postal code"
             value={address.postalCode}
             onChange={handleChange}
             required
@@ -87,9 +95,10 @@ function AddressPage() {
         <div>
           <label htmlFor="phoneNumber">Phone Number:</label>
           <input
-            type="tel" // Change input type to tel for phone numbers
+            type="tel"
             id="phoneNumber"
             name="phoneNumber"
+            placeholder="10-digit phone number"
             value={address.phoneNumber}
             onChange={handleChange}
             required

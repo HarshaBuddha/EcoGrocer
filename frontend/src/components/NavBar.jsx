@@ -32,7 +32,7 @@ function Navbar() {
   return (
     <nav className="navbar">
       <div className="navbar-brand">
-        <Link to="/">ECOGROCER</Link>
+        <Link to="/"><img width="22" src="favicon.ico" alt="" /> ECOGROCER</Link>
       </div>
       <div className="navbar-links">
         <Link to="/">Home</Link>

@@ -8,6 +8,7 @@
     color: white;
     position: sticky;
     top: 0px;
+    z-index: 100;
   }
   
   .navbar-brand a {
@@ -942,7 +943,7 @@ body {
 
 .address-container h1 {
   font-size: 24px; /* Heading size */
-  color: #5A2D91; /* Dark purple color */
+  color: #45c647; /* Dark purple color */
   margin-bottom: 20px; /* Space below heading */
 }
 
@@ -977,7 +978,7 @@ body {
 
 .address-container button {
   padding: 10px; /* Padding for the button */
-  background-color: #5A2D91; /* Dark purple background */
+  background-color: #45c647; /* Dark purple background */
   color: white; /* White text color */
   border: none; /* No border */
   border-radius: 4px; /* Rounded corners */
@@ -987,7 +988,7 @@ body {
 }
 
 .address-container button:hover {
-  background-color: #763BAE; /* Lighter purple on hover */
+  background-color: #388e3c; /* Lighter purple on hover */
 }
 
 /*Admin Dashboard*/
