@@ -1,20 +1,27 @@
 import React, { useState } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 function Signup() {
-  // State to store input values
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate(); // Initialize `useNavigate` here
 
-  // Function to handle form submission
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    // Implement signup logic here
-    console.log('First Name:', firstName);
-    console.log('Last Name:', lastName);
-    console.log('Email:', email);
-    console.log('Password:', password);
+    try {
+      await axios.post('http://localhost:5000/api/auth/signup', { firstName, lastName, email, password });
+      console.log('Signup successful');
+      alert('Signup Successful! Redirecting to login page.');
+      
+      // Navigate to login page after successful signup
+      navigate('/login');
+    } catch (error) {
+      alert('Signup failed! Make sure to use a unique email address.');
+      console.error('Signup failed:', error.response?.data?.message || error.message);
+    }
   };
 
   return (
@@ -29,6 +36,7 @@ function Signup() {
             id="firstName"
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
+            placeholder='Enter the FirstName'
             required
           />
         </div>
@@ -39,6 +47,7 @@ function Signup() {
             id="lastName"
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
+            placeholder='Enter the Lastname'
             required
           />
         </div>
@@ -49,6 +58,7 @@ function Signup() {
             id="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            placeholder='Enter the Email'
             required
           />
         </div>
@@ -59,6 +69,7 @@ function Signup() {
             id="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            placeholder='Enter the Password'
             required
           />
         </div>

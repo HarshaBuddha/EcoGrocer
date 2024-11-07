@@ -1,8 +1,11 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
-function ProductCard({ product, onAddToCart, onBuyNow, onQuantityChange, quantity, onMouseEnter, onMouseLeave, isHovered }) {
+function ProductCard({ product, onAddToCart, onQuantityChange, quantity, onMouseEnter, onMouseLeave, isHovered }) {
+  const navigate = useNavigate();
+
   return (
-    <div
+    <div 
       className="product"
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
@@ -12,7 +15,7 @@ function ProductCard({ product, onAddToCart, onBuyNow, onQuantityChange, quantit
         alt={product.name}
       />
       <h3>{product.name}</h3>
-      <p>Rate: ${product.rate}</p>
+      <p>Price: ${product.rate}</p>
       <p>Quantity: {product.quantity}</p>
       <div className="quantity-controls">
         <button onClick={() => onQuantityChange(-1)}>-</button>
@@ -20,7 +23,6 @@ function ProductCard({ product, onAddToCart, onBuyNow, onQuantityChange, quantit
         <button onClick={() => onQuantityChange(1)}>+</button>
       </div>
       <button onClick={() => onAddToCart(product)}>Add to Cart</button>
-      <button onClick={() => onBuyNow(product)}>Buy It Now</button>
     </div>
   );
 }

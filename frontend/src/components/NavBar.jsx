@@ -3,7 +3,11 @@ import { Link, useNavigate } from 'react-router-dom';
 
 function Navbar() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const navigate = useNavigate();
+
+  // Check if the user is logged in
+  const isLoggedIn = !!sessionStorage.getItem('token');
 
   // Function to handle search input change
   const handleSearchChange = (event) => {
@@ -18,6 +22,13 @@ function Navbar() {
     }
   };
 
+  // Function to handle logout
+  const handleLogout = () => {
+    sessionStorage.removeItem('token'); // Remove token
+    alert('You have logged out successfully.'); // Optional alert
+    navigate('/'); // Redirect to home
+  };
+
   return (
     <nav className="navbar">
       <div className="navbar-brand">
@@ -30,8 +41,25 @@ function Navbar() {
         <Link to="/contact">Contact</Link>
       </div>
       <div className="navbar-auth">
-        <Link to="/login">Login</Link>
-        <Link to="/signup">Signup</Link>
+        {isLoggedIn ? (
+          <>
+            <div className="user-dropdown" onClick={() => setDropdownOpen(!dropdownOpen)}>
+              <span>User</span>
+              {dropdownOpen && (
+                <div className="dropdown-menu">
+                  <Link to="/profile">Profile</Link>
+                  <Link to="/my-orders">My Orders</Link>
+                  <button onClick={handleLogout}>Logout</button>
+                </div>
+              )}
+            </div>
+          </>
+        ) : (
+          <>
+            <Link to="/login">Login</Link>
+            <Link to="/signup">Signup</Link>
+          </>
+        )}
       </div>
       <form className="navbar-search" onSubmit={handleSearchSubmit}>
         <input

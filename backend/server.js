@@ -1,61 +1,50 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-require('dotenv').config();
+const connectDB = require('./config/db'); // MongoDB connection
+const farmRoutes = require('./routes/farmRoutes'); // Farm routes
+const authRoutes = require('./routes/authRoutes'); // Auth routes
+const orderRoutes = require('./routes/orderRoutes');
+const Stripe = require('stripe');
 
 const app = express();
-app.use(cors());
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+
+// Middleware
+app.use(cors({ origin: '*' }));
 app.use(express.json());
 
-// MongoDB connection
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-}).then(() => {
-  console.log('MongoDB connected');
-}).catch(err => console.log(err));
-
-// Define Product schema
-const productSchema = new mongoose.Schema({
-  name: String,
-  rate: Number,
-  quantity: String,
-  image: String,
-  hoverImage: String
-});
-
-const farmSchema = new mongoose.Schema({
-  name: String,
-  description: String,
-  logo: String,
-  farminside: String,
-  products: [productSchema]
-});
-
-const Farm = mongoose.model('Farm', farmSchema);
+// Connect to MongoDB
+connectDB();
 
 // Routes
-app.get('/farms', async (req, res) => {
+app.use('/api/farms', farmRoutes); // Farm routes
+app.use('/api/auth', authRoutes);   // Auth routes
+app.use('/api/orders', orderRoutes);
+
+// Payment processing route
+app.post('/api/create-payment-intent', async (req, res) => {
+  const { amount, currency } = req.body;
+
+  if (!amount || !currency) { 
+    return res.status(400).send({ error: 'Amount and currency are required' });
+  }
+
   try {
-    const farms = await Farm.find();
-    res.json(farms);
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: amount, // Amount already in cents
+      currency: currency,
+    });
+
+    res.send({ clientSecret: paymentIntent.client_secret });
   } catch (error) {
-    res.status(500).json({ error: 'Error fetching farms' });
+    console.error('Stripe error:', error);
+    res.status(500).send({ error: error.message });
   }
 });
 
-app.post('/farms', async (req, res) => {
-  const { name, description, logo, farminside, products } = req.body;
-
-  try {
-    const newFarm = new Farm({ name, description, logo, farminside, products });
-    await newFarm.save();
-    res.status(201).json(newFarm);
-  } catch (error) {
-    res.status(500).json({ error: 'Error creating farm' });
-  }
-});
-
+// Start the server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

@@ -1,29 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
+import { useNavigate } from 'react-router-dom';
 
 function Cart() {
   const [cart, setCart] = useState([]);
-  const navigate = useNavigate(); // Initialize useNavigate for navigation
-
-  const DELIVERY_CHARGE = 5; // Set a fixed delivery charge
+  const navigate = useNavigate();
+  const DELIVERY_CHARGE = 5; // Fixed delivery charge
 
   useEffect(() => {
     const storedCart = JSON.parse(localStorage.getItem('cart')) || [];
     setCart(storedCart);
   }, []);
 
-  // Function to handle removing an item from the cart
+  // Function to remove an item from the cart
   const removeFromCart = (index) => {
     const updatedCart = cart.filter((_, i) => i !== index);
     setCart(updatedCart);
     localStorage.setItem('cart', JSON.stringify(updatedCart));
   };
 
-  // Function to handle quantity change
+  // Function to change quantity of an item
   const handleQuantityChange = (index, delta) => {
     const updatedCart = cart.map((product, i) => {
       if (i === index) {
-        const newQuantity = Math.max(product.selectedQuantity + delta, 1);
+        const newQuantity = Math.max((product.selectedQuantity || 1) + delta, 1);
         return { ...product, selectedQuantity: newQuantity };
       }
       return product;
@@ -32,20 +31,27 @@ function Cart() {
     localStorage.setItem('cart', JSON.stringify(updatedCart));
   };
 
-  // Function to calculate the total cost of items in the cart
+  // Function to calculate the total cost including delivery charge
   const calculateTotal = () => {
-    const total = cart.reduce((acc, product) => acc + product.rate * product.selectedQuantity, 0);
-    return total + DELIVERY_CHARGE; // Add delivery charge to total
+    const total = cart.reduce(
+      (acc, product) => acc + (product.rate || 0) * (product.selectedQuantity || 1),
+      0
+    );
+    return total + DELIVERY_CHARGE;
   };
 
-  // Function to handle "Buy It Now" for all items in the cart
-  const handleBuyNow = () => {
-    if (cart.length > 0) {
-      // Store the current cart for purchase
-      localStorage.setItem('cart', JSON.stringify(cart));
-      navigate('/payment'); // Redirect to the payment page
+  // Handle navigating to the address page
+  const handleProceedToAddress = () => {
+    const token = sessionStorage.getItem('token'); // Check for the token in sessionStorage
+    
+    if (token) {
+      // If token exists, proceed to address page
+      const totalAmount = calculateTotal();
+      navigate('/address', { state: { totalAmount, cart } }); // Pass totalAmount and cart
     } else {
-      alert('Your cart is empty. Please add some products to proceed.');
+      // If no token, redirect to login page
+      alert('Please log in to proceed to payment');
+      navigate('/login');
     }
   };
 
@@ -58,25 +64,24 @@ function Cart() {
             <div key={index} className="cart-item">
               <div>
                 <h3>{product.name}</h3>
+                <p>Farm: {product.farmName || 'N/A'}</p> {/* Display farm name here */}
                 <p>Rate: ${product.rate}</p>
-                <p>Quantity: {product.quantity}</p>
+                <p>Quantity: {product.selectedQuantity || 1}</p> {/* Display selectedQuantity */}
                 <div className="quantity-controls">
                   <button onClick={() => handleQuantityChange(index, -1)}>-</button>
-                  <span>{product.selectedQuantity}</span>
+                  <span>{product.selectedQuantity || 1}</span>
                   <button onClick={() => handleQuantityChange(index, 1)}>+</button>
                 </div>
               </div>
               <button className="remove-button" onClick={() => removeFromCart(index)}>Remove</button>
             </div>
           ))}
-          {/* Display the grand total including delivery charge */}
           <div className="cart-total">
             <h3>Delivery Charge: ${DELIVERY_CHARGE}</h3>
             <h3>Grand Total: ${calculateTotal()}</h3>
           </div>
-          {/* Button to buy all items in the cart */}
           <div className="buy-now-container">
-            <button className="buy-now-button" onClick={handleBuyNow}>Buy All Now</button>
+            <button className="buy-now-button" onClick={handleProceedToAddress}>Proceed to Address</button> {/* Update button text */}
           </div>
         </>
       ) : (

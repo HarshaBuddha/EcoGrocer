@@ -14,26 +14,38 @@ function Home() {
     const navigate = useNavigate();
 
     const addToCart = (product) => {
-        const quantity = quantities[product._id] || 1;
-        const productWithQuantity = { ...product, selectedQuantity: quantity };
-        const updatedCart = [...cart, productWithQuantity];
-        setCart(updatedCart);
-        localStorage.setItem('cart', JSON.stringify(updatedCart));
+        const quantity = quantities[product._id] || 1; // Get the quantity from state or default to 1
+        const productWithQuantity = {
+            ...product,
+            selectedQuantity: quantity,
+            farmName: selectedFarm // Add farm name here
+        };
+    
+        // Retrieve the existing cart from localStorage
+        const storedCart = JSON.parse(localStorage.getItem('cart')) || [];
+    
+        // Check if the product already exists in the cart
+        const existingProductIndex = storedCart.findIndex(item => item._id === product._id);
+    
+        if (existingProductIndex >= 0) {
+            // If the product exists, update the quantity
+            storedCart[existingProductIndex].selectedQuantity += quantity;
+        } else {
+            // If the product does not exist, add it to the cart
+            storedCart.push(productWithQuantity);
+        }
+    
+        setCart(storedCart);
+        localStorage.setItem('cart', JSON.stringify(storedCart)); // Save updated cart to localStorage
         navigate('/cart');
     };
-
-    const handleBuyNow = (product) => {
-        const quantity = quantities[product._id] || 1;
-        const productWithQuantity = { ...product, selectedQuantity: quantity };
-        localStorage.setItem('cart', JSON.stringify([productWithQuantity]));
-        navigate('/payment');
-    };
+    
 
     useEffect(() => {
         const fetchFarms = async () => {
             setLoading(true);
             try {
-                const response = await fetch('http://localhost:5000/farms');
+                const response = await fetch('http://localhost:5000/api/farms');
                 const data = await response.json();
                 setFarmsData(data);
             } catch (error) {
@@ -63,7 +75,6 @@ function Home() {
                         product={product}
                         quantity={quantities[product._id] || 1}
                         onAddToCart={addToCart}
-                        onBuyNow={handleBuyNow}
                         onQuantityChange={(delta) => handleQuantityChange(product._id, delta)}
                         onMouseEnter={() => setHoveredProductId(product._id)}
                         onMouseLeave={() => setHoveredProductId(null)}

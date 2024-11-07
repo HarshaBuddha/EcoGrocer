@@ -10,7 +10,12 @@ import SearchResults from './Pages/SearchResults';
 import Login from './Pages/Login';
 import Payment from './Pages/Payment';
 import Signup from './Pages/SignUp';
-
+import Confirmation from './Pages/confirmation';
+import AddressPage from './Pages/AddressPage';
+import MyOrdersPage from './Pages/orders';
+import OrderDetail from './Pages/OrderDetail';
+import AdminDashboard from './Pages/AdminDashboard';
+import AdminOrderDetails from './Pages/adminOrderDetails';
 
 function App() {
   return (
@@ -26,6 +31,12 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/payment" element={<Payment />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path='/confirmation' element={<Confirmation />} />
+          <Route path='/address' element={<AddressPage />} />
+          <Route path='/my-orders' element={<MyOrdersPage />} />
+          <Route path="/order/:orderId" element={<OrderDetail />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/orders/:orderId" element={<AdminOrderDetails />} />
         </Routes>
       </Router>
     </div>

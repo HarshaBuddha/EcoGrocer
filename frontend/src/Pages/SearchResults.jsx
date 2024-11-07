@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation,useNavigate } from 'react-router-dom';
+import ProductCard from '../components/ProductCard';
+
 
 function SearchResults() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const location = useLocation();
+  const navigate=useNavigate();
   const query = new URLSearchParams(location.search).get('query');
+  const [quantities, setQuantities] = useState({});
+  const [hoveredProductId, setHoveredProductId] = useState(null); // Hover logic
 
   useEffect(() => {
     const fetchSearchResults = async () => {
@@ -16,21 +21,19 @@ function SearchResults() {
       }
       setLoading(true);
       try {
-        // Fetch all farms to get their products
-        const response = await fetch('http://localhost:5000/farms');
+        const response = await fetch('http://localhost:5000/api/farms');
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
         const farms = await response.json();
 
-        // Extract products from all farms and filter them based on the search query
-        const allProducts = farms.flatMap(farm => 
+        const allProducts = farms.flatMap(farm =>
           farm.products.map(product => ({
             ...product,
             farmName: farm.name // Add farm name to each product
           }))
         );
-        
+
         const filteredResults = allProducts.filter(product =>
           product.name.toLowerCase().includes(query.toLowerCase())
         );
@@ -47,23 +50,42 @@ function SearchResults() {
     fetchSearchResults();
   }, [query]);
 
+  const handleQuantityChange = (productId, delta) => {
+    setQuantities((prevQuantities) => {
+      const newQuantity = Math.max((prevQuantities[productId] || 1) + delta, 1);
+      return { ...prevQuantities, [productId]: newQuantity };
+    });
+  };
+
+  const handleAddToCart = (product) => {
+    const quantity = quantities[product._id] || 1;
+    const productWithQuantity = { ...product, selectedQuantity: quantity };
+    const updatedCart = [...(JSON.parse(localStorage.getItem('cart')) || []), productWithQuantity];
+    localStorage.setItem('cart', JSON.stringify(updatedCart));
+    navigate('/cart')
+  };
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>{error}</div>;
+
   return (
-    <div>
+    <div className="search-results">
       <h1>Search Results</h1>
-      {loading ? (
-        <p>Loading...</p>
-      ) : error ? (
-        <p>{error}</p>
-      ) : results.length > 0 ? (
-        results.map((product, index) => (
-          <div key={index} className="product-card">
-            <img src={product.image} alt={product.name} />
-            <h3>{product.name}</h3>
-            <p>Farm: {product.farmName}</p> {/* Display the farm name */}
-            <p>Rate: ${product.rate}</p>
-            <p>Quantity: {product.quantity}</p>
-          </div>
-        ))
+      {results.length > 0 ? (
+        <div className="products">
+          {results.map((product) => (
+            <ProductCard
+              key={product._id} // Ensure unique key
+              product={product}
+              quantity={quantities[product._id] || 1}
+              onAddToCart={handleAddToCart}
+              onQuantityChange={(delta) => handleQuantityChange(product._id, delta)}
+              onMouseEnter={() => setHoveredProductId(product._id)}  
+              onMouseLeave={() => setHoveredProductId(null)}       
+              isHovered={hoveredProductId === product._id} // Check if hovered
+            />
+          ))}
+        </div>
       ) : (
         <p>No products found matching "{query}"</p>
       )}
